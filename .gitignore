@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+# local vector index (rebuild with `python -m rag_app ingest`)
+storage/
+# your source documents stay local; keep the folder
+data/raw/*
+!data/raw/.gitkeep
+*.egg-info/
