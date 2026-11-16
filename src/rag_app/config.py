@@ -16,6 +16,7 @@ class Settings:
     top_k: int = int(os.getenv("RAG_TOP_K", "5"))
     chunk_size: int = int(os.getenv("RAG_CHUNK_SIZE", "1000"))
     chunk_overlap: int = int(os.getenv("RAG_CHUNK_OVERLAP", "200"))
+    feedback_db: Path = Path(os.getenv("RAG_FEEDBACK_DB", "data/feedback.db"))
 
 
 settings = Settings()

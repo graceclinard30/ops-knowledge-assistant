@@ -5,9 +5,23 @@ from .config import settings
 from .loaders import Chunk
 
 
+def _client():
+    return chromadb.PersistentClient(path=str(settings.storage_dir))
+
+
 def get_collection():
-    client = chromadb.PersistentClient(path=str(settings.storage_dir))
-    return client.get_or_create_collection(settings.collection)
+    return _client().get_or_create_collection(settings.collection)
+
+
+def reset_collection() -> None:
+    """Delete the whole index so a rebuild doesn't keep passages from removed/edited files."""
+    client = _client()
+    if settings.collection in [c if isinstance(c, str) else c.name for c in client.list_collections()]:
+        client.delete_collection(settings.collection)
+
+
+def count() -> int:
+    return get_collection().count()
 
 
 def add_chunks(chunks: list[Chunk], batch_size: int = 100) -> None:

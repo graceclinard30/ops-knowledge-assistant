@@ -8,4 +8,6 @@ storage/
 # your source documents stay local; keep the folder
 data/raw/*
 !data/raw/.gitkeep
+# employee issue reports (local SQLite database)
+data/feedback.db
 *.egg-info/

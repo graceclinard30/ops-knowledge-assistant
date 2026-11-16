@@ -1,5 +1,6 @@
 """CLI: `python -m rag_app ingest` and `python -m rag_app ask "question"`."""
 import argparse
+from pathlib import Path
 
 from .config import settings
 
@@ -11,16 +12,27 @@ def main() -> None:
     ask = sub.add_parser("ask", help="Ask a question over the indexed documents")
     ask.add_argument("question")
     ask.add_argument("-k", type=int, default=settings.top_k, help="chunks to retrieve")
+    ev = sub.add_parser("eval", help="Measure retrieval Hit@k against the KB-008 scenarios")
+    ev.add_argument("--file", type=Path, default=Path("eval/08_sample_support_scenarios.txt"))
+    ev.add_argument("-k", type=int, default=settings.top_k, help="chunks to retrieve")
     args = parser.parse_args()
+
+    if args.command == "eval":
+        from .evaluate import run
+        from .store import search
+
+        run(args.file, settings.data_dir, args.k, search)
+        return
 
     if args.command == "ingest":
         from .loaders import load_chunks
-        from .store import add_chunks
+        from .store import add_chunks, reset_collection
 
         chunks = load_chunks(settings.data_dir, settings.chunk_size, settings.chunk_overlap)
         if not chunks:
             print(f"No .txt/.md/.pdf files found in {settings.data_dir}")
             return
+        reset_collection()
         add_chunks(chunks)
         print(f"Indexed {len(chunks)} chunks from {len({c.source for c in chunks})} files.")
     else:

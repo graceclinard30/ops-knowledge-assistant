@@ -1,5 +1,6 @@
 """Answer a question with Claude, grounded in retrieved chunks."""
 import sys
+from collections.abc import Iterator
 
 import anthropic
 
@@ -19,7 +20,13 @@ def build_context(hits: list[dict]) -> str:
     )
 
 
-def answer(question: str, hits: list[dict], client: anthropic.Anthropic | None = None) -> str:
+REFUSAL_MESSAGE = "[The model declined to answer this request.]"
+
+
+def stream_answer(
+    question: str, hits: list[dict], client: anthropic.Anthropic | None = None
+) -> Iterator[str]:
+    """Yield the answer text piece by piece as Claude writes it (used by CLI and web UI)."""
     client = client or anthropic.Anthropic()
     user_content = f"<documents>\n{build_context(hits)}\n</documents>\n\nQuestion: {question}"
 
@@ -34,12 +41,19 @@ def answer(question: str, hits: list[dict], client: anthropic.Anthropic | None =
         fallbacks="default",
         messages=[{"role": "user", "content": user_content}],
     ) as stream:
-        for text in stream.text_stream:
-            sys.stdout.write(text)
-            sys.stdout.flush()
+        yield from stream.text_stream
         final = stream.get_final_message()
-    print()
 
     if final.stop_reason == "refusal":
-        return "[The model declined to answer this request.]"
-    return "".join(b.text for b in final.content if b.type == "text")
+        yield "\n\n" + REFUSAL_MESSAGE
+
+
+def answer(question: str, hits: list[dict], client: anthropic.Anthropic | None = None) -> str:
+    """Print the answer to the terminal as it streams, and return the full text."""
+    parts = []
+    for text in stream_answer(question, hits, client):
+        sys.stdout.write(text)
+        sys.stdout.flush()
+        parts.append(text)
+    print()
+    return "".join(parts)
