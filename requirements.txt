@@ -4,3 +4,5 @@ pypdf>=5.0
 python-dotenv>=1.0
 pytest>=8.0
 streamlit>=1.40
+# installs this project's src/rag_app package (needed by app.py on hosted platforms)
+-e .

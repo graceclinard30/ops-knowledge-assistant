@@ -1,0 +1,24 @@
+DOCUMENT ID: KB-005
+TITLE: Integration Testing and Release Gates
+CATEGORY: Engineering Delivery
+VERSION: 1.0
+STATUS: Synthetic training material
+
+TEST LEVELS
+Unit tests validate isolated functions. Integration tests validate interactions between services, parsers, databases, and interfaces. Regression tests check that existing behavior remains correct. User acceptance testing (UAT) checks whether a solution meets agreed business requirements.
+
+RELEASE GATES FOR THE DEMO PLATFORM
+Gate A: Requirements and acceptance criteria documented.
+Gate B: Automated tests pass in a nonproduction environment.
+Gate C: Reconciliation of inbound, accepted, rejected, and output counts succeeds.
+Gate D: Security and data-handling review completed.
+Gate E: Rollback and monitoring plans documented.
+Gate F: Business owner signs off on UAT results.
+
+SAMPLE ACCEPTANCE CRITERIA
+Given a batch with 20 valid synthetic claims and 2 malformed synthetic claims, when the intake service runs, then exactly 20 records should enter downstream processing, exactly 2 should be rejected with actionable error codes, and all 22 should be accounted for in reconciliation.
+
+POST-RELEASE CHECKS
+Monitor failure rates, duplicate detection, queue depth, processing latency, and reconciliation mismatches. Escalate deviations from established baselines.
+
+RELATED DOCUMENTS: KB-004, KB-006, KB-007.

@@ -1,0 +1,25 @@
+DOCUMENT ID: KB-001
+TITLE: Healthcare Claims Processing Overview
+CATEGORY: Operations
+VERSION: 1.0
+STATUS: Synthetic training material
+
+PURPOSE
+Describe a simplified healthcare claim lifecycle for a demonstration retrieval-augmented generation (RAG) assistant. All procedures and identifiers are fictional and are not company policy.
+
+PROCESS STAGES
+1. Intake: A claim arrives from a trading partner through a secure file-transfer or API channel. The intake service assigns an internal tracking ID and records arrival time.
+2. Syntax validation: The system checks file format, mandatory segments, control numbers, and basic field lengths. A structurally invalid claim is rejected before adjudication.
+3. Member and provider validation: The system checks member eligibility, service dates, provider identifiers, and required authorization data.
+4. Benefit and pricing evaluation: Applicable benefit rules, network terms, exclusions, and pricing logic are evaluated.
+5. Adjudication: The system determines a payable, denied, or pended outcome. A pended claim requires further review or missing information.
+6. Response generation: The system creates a response or acknowledgment according to the trading-partner interface specification.
+7. Monitoring: Operations teams reconcile inbound volumes, processed counts, exception counts, and outbound responses.
+
+IMPORTANT DISTINCTIONS
+A file acknowledgment confirms receipt or processing status at a particular interface stage; it does not necessarily mean the claim was paid. A denial is a business outcome; a rejection may indicate a technical or data validation problem.
+
+ESCALATION
+If a file fails intake validation, contact the integration support queue. If the file is accepted but a claim pends unexpectedly, contact the claims configuration team. For a suspected software defect, provide a sanitized claim ID, timestamps, stage, expected result, actual result, and reproducible steps.
+
+RELATED DOCUMENTS: KB-002, KB-003, KB-004, KB-006.

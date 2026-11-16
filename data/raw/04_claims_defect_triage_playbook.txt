@@ -1,0 +1,27 @@
+DOCUMENT ID: KB-004
+TITLE: Claims Defect Triage Playbook
+CATEGORY: Quality Assurance
+VERSION: 1.0
+STATUS: Synthetic training material
+
+SEVERITY DEFINITIONS
+SEV-1: Broad production outage or material risk of incorrect payment across many claims. Immediate incident response.
+SEV-2: Significant processing degradation, repeatable incorrect adjudication, or a blocked high-priority client batch. Same-day triage.
+SEV-3: Limited-impact defect with an available workaround. Standard defect queue.
+SEV-4: Cosmetic issue or low-risk documentation problem. Backlog prioritization.
+
+REQUIRED DEFECT RECORD
+Include a sanitized tracking ID, environment, timestamp, input format, processing stage, expected behavior, observed behavior, reproducible steps, volume affected, and any workaround.
+
+TRIAGE WORKFLOW
+1. Reproduce the problem using synthetic or approved masked data.
+2. Determine whether the issue is input data, mapping, configuration, code, or infrastructure.
+3. Estimate scope and severity using evidence, not intuition.
+4. Assign an owner and document the next action.
+5. Validate the fix with targeted and regression tests.
+6. Reconcile outcomes after deployment and close with root cause and prevention notes.
+
+EXAMPLE
+An incoming batch is accepted, but claims with a particular synthetic procedure code pend incorrectly. If the source fields are valid and the behavior is repeatable, investigate benefit configuration and adjudication rules before assuming an X12 parsing failure.
+
+RELATED DOCUMENTS: KB-001, KB-005, KB-006.

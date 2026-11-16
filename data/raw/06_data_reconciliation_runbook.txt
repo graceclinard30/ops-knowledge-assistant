@@ -1,0 +1,29 @@
+DOCUMENT ID: KB-006
+TITLE: Data Reconciliation Runbook
+CATEGORY: Data Quality
+VERSION: 1.0
+STATUS: Synthetic training material
+
+CORE FORMULA
+Submitted records = accepted records + rejected records + unaccounted records, assuming each submitted record is assigned to exactly one category at the intake checkpoint.
+
+EXAMPLE A: PASS
+Submitted 250; accepted 242; rejected 8; unaccounted 0. Reconciliation passes.
+
+EXAMPLE B: FAIL
+Submitted 250; accepted 240; rejected 8; unaccounted 2. Reconciliation fails. Investigate the 2 unaccounted records before closing the batch.
+
+COMMON CAUSES OF MISMATCH
+Duplicate handling, parser failures, dropped records, unexpected filtering, asynchronous processing delays, and mismatched batch boundaries.
+
+INVESTIGATION STEPS
+1. Confirm the checkpoint and time window used by each count.
+2. Compare batch IDs and record identifiers across stages.
+3. Separate in-flight records from missing records.
+4. Check duplicate and retry logs.
+5. Document the root cause and rerun the reconciliation after correction.
+
+IMPORTANT
+A claim pending adjudication can still count as accepted at the intake checkpoint. Do not classify every pending claim as unaccounted.
+
+RELATED DOCUMENTS: KB-001, KB-002, KB-003.

@@ -1,0 +1,24 @@
+DOCUMENT ID: KB-003
+TITLE: Acknowledgment and Response File Reference
+CATEGORY: Interfaces
+VERSION: 1.0
+STATUS: Synthetic training material
+
+PURPOSE
+Explain why an acknowledgment is not the same as a finalized claim outcome.
+
+ACKNOWLEDGMENT TYPES
+- Transport receipt: The receiving endpoint confirms that a file was delivered.
+- Syntax acknowledgment: A validation response indicates whether the interchange or transaction passed structural checks.
+- Business response: A downstream message communicates processing or claim-level disposition as defined by the interface.
+
+INTERPRETATION RULES
+A successful transport receipt does not prove the contents are valid. A successful syntax acknowledgment does not prove that eligibility, benefits, or payment rules have been satisfied. A final adjudication result is a separate business event.
+
+RECONCILIATION EXAMPLE
+At 09:00, a batch of 80 claims is received. At 09:03, a transport receipt is generated. At 09:07, 78 claims pass initial validation and 2 are rejected. At 10:15, 70 accepted claims are finalized and 8 remain pending. The 8 pending claims are not missing: they are accepted claims awaiting further processing.
+
+WHEN TO ESCALATE
+If a response file is missing after the interface's agreed service-level window, capture the batch ID, send time, receipt time, expected response type, and last successful processing stage. Do not resend the file blindly because duplicates may be created.
+
+RELATED DOCUMENTS: KB-001, KB-002, KB-004.

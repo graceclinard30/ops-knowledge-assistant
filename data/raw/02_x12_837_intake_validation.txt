@@ -1,0 +1,32 @@
+DOCUMENT ID: KB-002
+TITLE: X12 837 Intake and Validation Guide
+CATEGORY: Data Integration
+VERSION: 1.0
+STATUS: Synthetic training material
+
+OVERVIEW
+X12 837 is an electronic transaction format used to submit healthcare claims. This training guide focuses on validation concepts rather than a complete implementation of the standard.
+
+COMMON INTAKE CHECKS
+- Confirm that the interchange and transaction envelopes are present and properly paired.
+- Check sender and receiver identifiers against the approved trading-partner configuration.
+- Check for duplicate interchange or transaction control numbers under the interface's configured duplicate-detection rules.
+- Confirm required patient, subscriber, provider, claim, and service-line information is populated for the applicable claim type.
+- Validate file encoding and delimiter handling before parsing.
+- Compare accepted, rejected, and pending record counts with the inbound batch manifest.
+
+EXAMPLE SYNTHETIC FAILURE
+Batch BATCH-DEMO-104 contains 120 submitted claim records. The parser accepts 115 and rejects 5 because mandatory provider identifiers are absent. The correct reconciliation is submitted=120, accepted=115, rejected=5, with no unaccounted records.
+
+TROUBLESHOOTING ORDER
+1. Confirm file receipt and checksum.
+2. Inspect parser logs for the first failure stage.
+3. Validate envelope and control numbers.
+4. Identify affected record IDs without exposing protected health information.
+5. Compare source fields with the expected target schema.
+6. Reprocess only after the defect or input error is resolved and duplicate handling is understood.
+
+SAFETY NOTE
+Never paste real patient names, dates of birth, member IDs, or other PHI into a public AI service. Use synthetic examples in this demo.
+
+RELATED DOCUMENTS: KB-001, KB-003, KB-006.

@@ -19,6 +19,16 @@ def rebuild_index() -> tuple[int, int]:
     return len(chunks), len({c.source for c in chunks})
 
 
+@st.cache_resource(show_spinner="Building the search index (first start only)...")
+def ensure_index() -> None:
+    """On a fresh server (e.g. a new cloud deploy) the index doesn't exist yet - build it once."""
+    if count() == 0:
+        rebuild_index()
+
+
+ensure_index()
+st.session_state.setdefault("questions_used", 0)
+
 # ---------- Sidebar: documents and index ----------
 with st.sidebar:
     st.header("Documents")
@@ -32,14 +42,15 @@ with st.sidebar:
     else:
         st.info(f"No documents yet in `{settings.data_dir}`.")
 
-    uploads = st.file_uploader(
-        "Add documents", type=[s.lstrip(".") for s in SUPPORTED], accept_multiple_files=True
-    )
-    if uploads and st.button("Save uploaded files"):
-        for f in uploads:
-            (settings.data_dir / f.name).write_bytes(f.getbuffer())
-        st.success(f"Saved {len(uploads)} file(s). Rebuild the index to search them.")
-        st.rerun()
+    if not settings.public_demo:
+        uploads = st.file_uploader(
+            "Add documents", type=[s.lstrip(".") for s in SUPPORTED], accept_multiple_files=True
+        )
+        if uploads and st.button("Save uploaded files"):
+            for f in uploads:
+                (settings.data_dir / f.name).write_bytes(f.getbuffer())
+            st.success(f"Saved {len(uploads)} file(s). Rebuild the index to search them.")
+            st.rerun()
 
     st.divider()
     st.header("Index")
@@ -48,7 +59,9 @@ with st.sidebar:
         st.caption(f"{n} passages indexed" if n else "Index is empty.")
     except Exception as e:  # index folder unreadable/corrupt
         st.caption(f"Could not read index: {e}")
-    if st.button("Rebuild index", type="primary"):
+    if settings.public_demo:
+        st.caption("Public demo: uploading and re-indexing are turned off.")
+    elif st.button("Rebuild index", type="primary"):
         with st.spinner("Indexing documents..."):
             n_chunks, n_files = rebuild_index()
         st.success(f"Indexed {n_chunks} passages from {n_files} files.")
@@ -63,6 +76,9 @@ with st.sidebar:
         key="search_only",
         help="Show the matching passages without sending anything to Claude. Free and offline.",
     )
+    if settings.public_demo:
+        left = max(settings.demo_question_limit - st.session_state.questions_used, 0)
+        st.caption(f"Claude answers left this session: {left} (search-only is unlimited)")
 
 
 # ---------- Main ----------
@@ -102,7 +118,7 @@ def report_form(last: dict) -> None:
 
 with ask_tab:
     question = st.text_input(
-        "Question", placeholder="e.g. How should a rejected 837 claim be triaged?"
+        "Question", placeholder="e.g. How should a rejected 837 claim be triaged?", max_chars=500
     )
     ask = st.button("Ask")
     just_streamed = False
@@ -113,7 +129,19 @@ with ask_tab:
             st.warning("The index is empty. Click **Rebuild index** in the sidebar first.")
             st.stop()
         answer_text = None
+        limit_hit = (
+            settings.public_demo
+            and st.session_state.questions_used >= settings.demo_question_limit
+        )
+        if not search_only and limit_hit:
+            st.warning(
+                "You've used all the Claude answers for this demo session. Turn on "
+                "**Search only** in the sidebar to keep exploring the documents.",
+                title="Demo limit reached",
+            )
+            st.stop()
         if not search_only:
+            st.session_state.questions_used += 1
             st.subheader("Answer")
             try:
                 answer_text = st.write_stream(stream_answer(question, hits))
@@ -155,6 +183,11 @@ with ask_tab:
 
 
 with reports_tab:
+    if settings.public_demo:
+        st.info(
+            "This is a public demo: reports are stored temporarily and reset when the app "
+            "restarts, and status changes are turned off.",
+        )
     show = st.segmented_control(
         "Show", ["all", *feedback.STATUSES], default="open", key="report_filter"
     )
@@ -181,11 +214,14 @@ with reports_tab:
             "Download as CSV", df.to_csv(index=False), "reported_issues.csv", "text/csv"
         )
 
-        with st.container(border=True):
-            st.markdown("**Update a report's status**")
-            with st.container(horizontal=True, vertical_alignment="bottom"):
-                rid = st.selectbox("Report #", [r["id"] for r in reports], key="status_id")
-                new_status = st.selectbox("New status", feedback.STATUSES, key="status_value")
-                if st.button("Update"):
-                    feedback.set_status(rid, new_status)
-                    st.rerun()
+        if not settings.public_demo:
+            with st.container(border=True):
+                st.markdown("**Update a report's status**")
+                with st.container(horizontal=True, vertical_alignment="bottom"):
+                    rid = st.selectbox("Report #", [r["id"] for r in reports], key="status_id")
+                    new_status = st.selectbox(
+                        "New status", feedback.STATUSES, key="status_value"
+                    )
+                    if st.button("Update"):
+                        feedback.set_status(rid, new_status)
+                        st.rerun()

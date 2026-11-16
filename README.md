@@ -83,15 +83,15 @@ The test set is small: 6 questions over 7 documents. These numbers are a baselin
 
 - **Citations and expandable source passages** under every answer. The assistant says what the documents don't cover, including documents that are referenced but missing.
 - **Data minimization:** embedding and search run locally, and the LLM sees only the top-k passages.
-- **Secrets and data out of git:** the API key, source documents, index and feedback database are all ignored by git.
+- **Secrets and data out of git:** the API key, index and feedback database are ignored by git. Only the synthetic documents are committed.
 - **Search-only mode** for debugging retrieval separately from generation, and for when the API is unavailable.
 
 ## Run it
 
 ```powershell
 python -m venv .venv; .venv\Scripts\Activate.ps1
-pip install -r requirements.txt; pip install -e .
-copy .env.example .env      # add ANTHROPIC_API_KEY
+pip install -r requirements.txt
+copy .env.example .env      # add ANTHROPIC_API_KEY (model defaults to claude-sonnet-5-5)
 python -m rag_app ingest    # index data/raw
 streamlit run app.py        # web UI
 python -m rag_app eval      # retrieval eval
@@ -105,10 +105,19 @@ eval/               Scenario answer key (kept out of the index)
 tests/
 ```
 
+## Deployment
+
+Hosted on Streamlit Community Cloud. The index builds automatically on first start. Setting `PUBLIC_DEMO=true` puts the app in public demo mode:
+- uploading, re-indexing and report status changes are hidden
+- each visitor gets 10 Claude answers per session (`DEMO_QUESTION_LIMIT`), and search-only stays unlimited
+- questions are capped at 500 characters
+
+The API key lives in the host's secrets store. A monthly spending limit is set on the API account.
+
 ## Roadmap to production
 
 - **Identity:** SSO instead of typed-in names, a record of who changed what, and a reviewer role.
-- **Hosting:** a container, a managed vector database and Postgres.
+- **Persistence:** the demo host's disk resets on restart, so reports are temporary. Production would use a managed Postgres for reports and a managed vector database.
 - **Retrieval:** split documents by heading, add reranking, track Hit@k in CI on a larger test set.
 - **Freshness:** show each document's version and last-reviewed date in answers, and send reports automatically to each document's owner.
 - **Analytics:** most-reported documents and questions the documents couldn't answer, as a prioritized documentation backlog.
