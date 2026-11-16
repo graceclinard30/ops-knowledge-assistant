@@ -57,7 +57,7 @@ with st.sidebar:
     st.divider()
     top_k = st.slider("Passages to retrieve", 1, 15, settings.top_k)
 
-    # TEMPORARY (demo): search-only mode skips Claude and just shows matching passages.
+    # Search-only mode skips Claude and just shows matching passages (free, offline).
     search_only = st.toggle(
         "Search only (no LLM)",
         key="search_only",
@@ -129,7 +129,7 @@ with ask_tab:
     last = st.session_state.get("last")
     if last:
         if last["answer"] is None:
-            # TEMPORARY (demo): search-only results
+            # Search-only results
             st.info(
                 "Showing the passages that best match your question. No LLM was used.",
                 title="Search-only mode",
